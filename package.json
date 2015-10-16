@@ -1,0 +1,35 @@
+{
+  "name": "multicolour-auth-oauth",
+  "version": "1.0.0",
+  "description": "OAuth auth plugin for Multicolour Servers",
+  "main": "index.js",
+  "scripts": {
+    "test": "tape tests/*.js | tap-spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/newworldcode/multicolour-auth-oauth.git"
+  },
+  "keywords": [
+    "oauth",
+    "multicolour"
+  ],
+  "author": "newworldcode <hello@newworld.codes> (https://newworld.codes)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/newworldcode/multicolour-auth-oauth/issues"
+  },
+  "homepage": "https://github.com/newworldcode/multicolour-auth-oauth#readme",
+  "devDependencies": {
+    "eslint": "^1.5.1",
+    "istanbul": "^0.3.22",
+    "tap-spec": "^4.1.0",
+    "tape": "^4.2.0"
+  },
+  "dependencies": {
+    "bell": "^5.4.0",
+    "boom": "^2.9.0",
+    "hapi": "^10.5.0",
+    "hapi-auth-cookie": "^3.1.0"
+  }
+}
