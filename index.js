@@ -38,8 +38,14 @@ class Multicolour_Auth_OAuth extends Map {
         throw error
       }
 
-      // Register the auth strategy.
-      server.auth.strategy(config.provider, "bell", config)
+      // Register the auth strategies.
+      config.providers.forEach(auth_config => {
+        // Add the password to the config.
+        auth_config.password = config.password
+
+        // Configure the strategy.
+        server.auth.strategy(auth_config.provider, "bell", auth_config)
+      })
 
       // We'll use cookies to store the session for now.
       server.auth.strategy("session", "cookie", {
@@ -54,35 +60,52 @@ class Multicolour_Auth_OAuth extends Map {
     return this
   }
 
+  /**
+   * Create a new session if the request is authorised.
+   * @param  {Request} request object.
+   * @param  {Reply} reply interface.
+   * @return {Reply} Reply interface for internal use.
+   */
   create(request, reply) {
     // Get the profile from the request.
     const profile = request.auth.credentials
 
-    console.log(profile)
-
-    if (!request.auth.isAuthenticated) {
+    // If it's not an authorised request, exit.
+    if (!request.auth.isAuthenticated || !profile) {
       return reply(Boom.unauthorized(request.auth.error.message))
     }
 
     // Set the session.
     request.auth.session.clear()
 
-    if (profile) {
-      request.auth.session.set(profile)
-    }
-
     // Keep going.
     reply.continue()
+
+    // Exit.
+    return reply
   }
 
+  /**
+   * Destroy the session.
+   * @param  {Request} request object.
+   * @param  {Reply} reply interface.
+   * @return {Reply} Reply interface for internal use.
+   */
   destroy(request, reply) {
     // Clear the session.
     request.auth.session.clear()
 
     // Keep on swimming, keep on swimming.
     reply.continue()
+
+    return reply
   }
 
+  /**
+   * Return references to the handlers for creating
+   * and destroying sessions. Consumed by the server generator.
+   * @return {Map} Map with create and destroy methods.
+   */
   handlers() {
     return new Map([
       ["create", this.create.bind(this)],
