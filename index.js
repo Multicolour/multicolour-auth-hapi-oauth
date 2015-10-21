@@ -72,7 +72,7 @@ class Multicolour_Auth_OAuth extends Map {
 
     // If it's not an authorised request, exit.
     if (!request.auth.isAuthenticated || !profile) {
-      return reply(Boom.unauthorized(request.auth.error.message))
+      return reply(Boom.unauthorized(request.auth.error.message)).code(403)
     }
 
     // Set the session.
@@ -116,12 +116,10 @@ class Multicolour_Auth_OAuth extends Map {
 
 // Export the required config for Multicolour
 // to register and handle.
-module.exports = host => {
-  return {
-    // It's an auth plugin.
-    type: host.get("types").AUTH_PLUGIN,
+module.exports = {
+  // It's an auth plugin.
+  type: require("multicolour/lib/consts").AUTH_PLUGIN,
 
-    // The generator is the class above.
-    plugin: Multicolour_Auth_OAuth
-  }
+  // The generator is the class above.
+  plugin: Multicolour_Auth_OAuth
 }
