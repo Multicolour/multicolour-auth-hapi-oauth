@@ -4,7 +4,8 @@
   "description": "OAuth auth plugin for Multicolour Servers",
   "main": "index.js",
   "scripts": {
-    "test": "tape tests/*.js | tap-spec"
+    "test": "tape tests/*.js | tap-spec",
+    "test-coverage": "istanbul cover tape tests/*.js --recursive --report lcov html -x handlers.js | tap-spec"
   },
   "repository": {
     "type": "git",
