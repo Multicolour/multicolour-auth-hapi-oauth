@@ -1,6 +1,10 @@
 "use strict"
 
+// Get the boom library for errors.
 const Boom = require("boom")
+
+// Get the user model.
+const user = require("./lib/user_model")
 
 class Multicolour_Auth_OAuth extends Map {
 
@@ -12,6 +16,7 @@ class Multicolour_Auth_OAuth extends Map {
     this
       .set("auth_name", "oauth")
       .set("generator", generator)
+      .set("users", user(generator.request("host").get("env")))
   }
 
   /**
@@ -30,6 +35,9 @@ class Multicolour_Auth_OAuth extends Map {
 
     // Get the config.
     const config = host.get("config").get("auth")
+
+    // Register the user model with the hosting Multicolour's Waterline instance.
+    host.request("waterline").loadCollection(this.get("users"))
 
     // Register the JWT plugin.
     server.register([require("bell"), require("hapi-auth-cookie")], error => {
@@ -70,16 +78,60 @@ class Multicolour_Auth_OAuth extends Map {
     // Get the profile from the request.
     const profile = request.auth.credentials
 
+    // Get the host.
+    const host = this.get("generator").request("host")
+
+    // Get the auth config.
+    const config = host.get("config").get("auth")
+
+    // Get the user model.
+    const users = host.get("database").get("models").user
+
     // If it's not an authorised request, exit.
     if (!request.auth.isAuthenticated || !profile) {
       return reply(Boom.unauthorized(request.auth.error.message)).code(403)
     }
 
-    // Set the session.
+    // Clear any current session.
     request.auth.session.clear()
 
-    // Keep going.
-    reply.continue()
+    // Check for the user to see if they have
+    // an account, if they don't we'll create
+    // one for them and log them in with it.
+    users.findOne({ username: profile.profile.username }, (err, found_user) => {
+      if (err) {
+        reply(Boom.wrap(err))
+      }
+      else if (!found_user) {
+        users.create({
+          username: profile.profile.username,
+          name: profile.profile.displayName,
+          source: profile.provider,
+          profile_image_url: profile.profile.raw.profile_image_url.replace(/_normal/, ""),
+          requires_password: true,
+          requires_email: true
+        },
+        (err, created_user) => {
+          if (err) {
+            reply(Boom.create(500, err.message, err))
+          }
+          else {
+            // Set the session details.
+            request.auth.session.set(found_user)
+
+            // Go to the user.
+            reply.redirect(config.register_password_redirect_path || `/user/${created_user.id}`).code(202)
+          }
+        })
+      }
+      else {
+        // Set the session details.
+        request.auth.session.set(found_user)
+
+        // Redirect.
+        reply.redirect(config.success_redirect_path || `/user/${found_user.id}`)
+      }
+    })
 
     // Exit.
     return reply

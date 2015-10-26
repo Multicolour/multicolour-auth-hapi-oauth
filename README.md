@@ -67,5 +67,7 @@ If, for example you wanted to have a Login With Twitter, Facebook & Github your 
 
 This will create several new endpoints which are visible on your `multicolour` docs page under the `session` endpoint.
 
+TODO:
+document `SALT_GEN_PRIME_LENGTH`, `PW_GEN_PW_ITERS`, `PW_GEN_PW_LENGTH`, `PW_GEN_PW_ALG`
 
 [bell]: https://github.com/hapijs/bell
