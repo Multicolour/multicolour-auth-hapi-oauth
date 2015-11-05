@@ -5,6 +5,7 @@ const Boom = require("boom")
 
 // Get the user model.
 const user = require("./lib/user_model")
+const session = require("./lib/session_model")
 
 class Multicolour_Auth_OAuth extends Map {
 
@@ -12,11 +13,15 @@ class Multicolour_Auth_OAuth extends Map {
     // Construct.
     super()
 
-    // Set the default.
+    // Get the host.
+    const host = generator.request("host")
+
+    // Set the defaults.
     this
-      .set("auth_name", "oauth")
+      .set("auth_names", ["session_store"])
       .set("generator", generator)
-      .set("users", user(generator.request("host").get("env")))
+      .set("users", user(host.get("env")))
+      .set("sessions", session(host.get("env")))
   }
 
   /**
@@ -37,10 +42,17 @@ class Multicolour_Auth_OAuth extends Map {
     const config = host.get("config").get("auth")
 
     // Register the user model with the hosting Multicolour's Waterline instance.
-    host.request("waterline").loadCollection(this.get("users"))
+    host.request("waterline")
+      .loadCollection(this.get("users"))
 
-    // Register the JWT plugin.
-    server.register([require("bell"), require("hapi-auth-cookie")], error => {
+    host.request("waterline")
+      .loadCollection(this.get("sessions"))
+
+    // Register the plugins to the server.
+    server.register([
+      require("bell"),
+      require("./lib/hapi-db-plugin")
+    ], error => {
       // Check for errors.
       if (error) {
         throw error
@@ -56,13 +68,8 @@ class Multicolour_Auth_OAuth extends Map {
       })
 
       // We'll use cookies to store the session for now.
-      server.auth.strategy("session", "cookie", {
-        password: config.password,
-        cookie: "suid",
-        redirectTo: "/session",
-        redirectOnTry: false,
-        isSecure: config.hasOwnProperty("isSecure") ? config.isSecure : true
-      })
+      server.auth.strategy("session_store", "session_store", { host })
+      server.auth.default("session_store")
     })
 
     return this
@@ -84,16 +91,25 @@ class Multicolour_Auth_OAuth extends Map {
     // Get the auth config.
     const config = host.get("config").get("auth")
 
-    // Get the user model.
-    const users = host.get("database").get("models").user
+    // Get the models.
+    const models = host.get("database").get("models")
+
+    // Get the user and session models.
+    const users = models.user
+    const sessions = models.session
+
+    // Create the session row.
+    const session = {
+      token: request.url.query.oauth_token,
+      verifier: request.url.query.oauth_verifier,
+      user: null,
+      provider: profile.provider
+    }
 
     // If it's not an authorised request, exit.
     if (!request.auth.isAuthenticated || !profile) {
-      return reply(Boom.unauthorized(request.auth.error.message)).code(403)
+      return reply(Boom.unauthorized(request.auth.error.message))
     }
-
-    // Clear any current session.
-    request.auth.session.clear()
 
     // Check for the user to see if they have
     // an account, if they don't we'll create
@@ -113,23 +129,39 @@ class Multicolour_Auth_OAuth extends Map {
         },
         (err, created_user) => {
           if (err) {
-            reply(Boom.create(500, err.message, err))
+            reply(Boom.wrap(err))
           }
           else {
-            // Set the session details.
-            request.auth.session.set(found_user)
+            // Add the user id to the session record.
+            session.user = created_user.id
 
-            // Go to the user.
-            reply.redirect(config.register_password_redirect_path || `/user/${created_user.id}`).code(202)
+            // Create the session.
+            sessions.create(session, err => {
+              if (err) {
+                reply(Boom.wrap(err))
+              }
+              else {
+                // Go to the user.
+                reply.continue() // redirect(config.register_password_redirect_path || `/user/${created_user.id}`)
+              }
+            })
           }
         })
       }
       else {
-        // Set the session details.
-        request.auth.session.set(found_user)
+        // Add the user id to the session record.
+        session.user = found_user.id
 
-        // Redirect.
-        reply.redirect(config.success_redirect_path || `/user/${found_user.id}`)
+        // Create the session.
+        sessions.create(session, err => {
+          if (err) {
+            reply(Boom.wrap(err))
+          }
+          else {
+            // Redirect.
+            reply.continue() // redirect(config.success_redirect_path || `/user/${found_user.id}`)
+          }
+        })
       }
     })
 
@@ -144,8 +176,16 @@ class Multicolour_Auth_OAuth extends Map {
    * @return {Reply} Reply interface for internal use.
    */
   destroy(request, reply) {
-    // Clear the session.
-    request.auth.session.clear()
+    // If it's not an authorised request, exit.
+    if (!request.auth.isAuthenticated) {
+      return reply(Boom.unauthorized(request.auth.error.message))
+    }
+
+    // Get the host.
+    const host = this.get("generator").request("host")
+
+    // Get the models.
+    const session = host.get("database").get("models").session
 
     // Keep on swimming, keep on swimming.
     reply.continue()
