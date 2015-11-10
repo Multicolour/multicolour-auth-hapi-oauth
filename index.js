@@ -4,7 +4,6 @@
 const Boom = require("boom")
 
 // Get the user model.
-const user = require("./lib/user_model")
 const session = require("./lib/session_model")
 
 class Multicolour_Auth_OAuth extends Map {
@@ -20,7 +19,6 @@ class Multicolour_Auth_OAuth extends Map {
     this
       .set("auth_names", ["session_store"])
       .set("generator", generator)
-      .set("users", user(host.get("env")))
       .set("sessions", session(host.get("env")))
   }
 
