@@ -29,7 +29,4 @@ class Test_Server_Plugin extends Map {
   stop() { return this }
 }
 
-module.exports = {
-  type: require("multicolour/lib/consts").SERVER_GENERATOR,
-  generator: Test_Server_Plugin
-}
+module.exports = Test_Server_Plugin

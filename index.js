@@ -28,10 +28,7 @@ class Multicolour_Auth_OAuth extends Map {
    * @param  {Function} generator that instantiates this plugin.
    * @return {Multicolour_Auth_OAuth} Object for chaining.
    */
-  register() {
-    // Get the generator calling this plugin.
-    const generator = this.get("generator")
-
+  register(generator) {
     // Get the host and server.
     const host = generator.request("host")
     const server = generator.request("raw")
@@ -39,12 +36,8 @@ class Multicolour_Auth_OAuth extends Map {
     // Get the config.
     const config = host.get("config").get("auth")
 
-    // Register the user model with the hosting Multicolour's Waterline instance.
-    host.request("waterline")
-      .loadCollection(this.get("users"))
-
-    host.request("waterline")
-      .loadCollection(this.get("sessions"))
+    // Register the session model with the hosting Multicolour's Waterline instance.
+    host.request("waterline").loadCollection(this.get("sessions"))
 
     // Register the plugins to the server.
     server.register([
@@ -69,6 +62,48 @@ class Multicolour_Auth_OAuth extends Map {
       server.auth.strategy("session_store", "session_store", { host })
       server.auth.default("session_store")
     })
+
+    // Get the token for use in the routes.
+    generator.set("auth_names", this.get("auth_names"))
+
+    // Get the handlers.
+    const handlers = this.handlers()
+
+    // Create login/register endpoints with the config.
+    config.providers.forEach(auth_config => {
+      /* istanbul ignore next : Not testable */
+      this.__server.route({
+        method: ["GET", "POST"],
+        path: `/session/${auth_config.provider}`,
+        config: {
+          auth: {
+            strategy: config.provider,
+            mode: "try"
+          },
+          handler: handlers.get("create"),
+          description: `Create a new session/user using "${config.provider}"`,
+          notes: `Create a new session/user using "${config.provider}"`,
+          tags: ["api", "auth", config.provider]
+        }
+      })
+    })
+
+    // Register some auth routes.
+    this.__server.route([
+      {
+        method: "DELETE",
+        path: `/session`,
+        config: {
+          auth: {
+            strategies: this.get("auth_names")
+          },
+          handler: handlers.get("destroy"),
+          description: `Delete a session.`,
+          notes: `Delete a session permanently.`,
+          tags: ["api", "auth"]
+        }
+      }
+    ])
 
     return this
   }
@@ -204,12 +239,6 @@ class Multicolour_Auth_OAuth extends Map {
   }
 }
 
-// Export the required config for Multicolour
+// Export Multicolour_Auth_OAuth Multicolour
 // to register and handle.
-module.exports = {
-  // It's an auth plugin.
-  type: require("multicolour/lib/consts").AUTH_PLUGIN,
-
-  // The generator is the class above.
-  plugin: Multicolour_Auth_OAuth
-}
+module.exports = Multicolour_Auth_OAuth
