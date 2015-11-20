@@ -174,8 +174,15 @@ class Multicolour_Auth_OAuth extends Map {
                 reply(Boom.wrap(err))
               }
               else {
-                // Go to the user.
-                reply.continue() // redirect(config.register_password_redirect_path || `/user/${created_user.id}`)
+                sessions.find(session).populate("user").exec((err, new_session) => {
+                  if (err) {
+                    reply(Boom.wrap(err))
+                  }
+                  else {
+                    // Redirect.
+                    reply(new_session)
+                  }
+                })
               }
             })
           }
@@ -191,8 +198,15 @@ class Multicolour_Auth_OAuth extends Map {
             reply(Boom.wrap(err))
           }
           else {
-            // Redirect.
-            reply.continue() // redirect(config.success_redirect_path || `/user/${found_user.id}`)
+            sessions.find(session).populate("user").exec((err, new_session) => {
+              if (err) {
+                reply(Boom.wrap(err))
+              }
+              else {
+                // Redirect.
+                reply(new_session)
+              }
+            })
           }
         })
       }
