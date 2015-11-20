@@ -72,24 +72,24 @@ class Multicolour_Auth_OAuth extends Map {
     // Create login/register endpoints with the config.
     config.providers.forEach(auth_config => {
       /* istanbul ignore next : Not testable */
-      this.__server.route({
+      server.route({
         method: ["GET", "POST"],
         path: `/session/${auth_config.provider}`,
         config: {
           auth: {
-            strategy: config.provider,
+            strategy: auth_config.provider,
             mode: "try"
           },
           handler: handlers.get("create"),
-          description: `Create a new session/user using "${config.provider}"`,
-          notes: `Create a new session/user using "${config.provider}"`,
-          tags: ["api", "auth", config.provider]
+          description: `Create a new session/user using "${auth_config.provider}"`,
+          notes: `Create a new session/user using "${auth_config.provider}"`,
+          tags: ["api", "auth", auth_config.provider]
         }
       })
     })
 
     // Register some auth routes.
-    this.__server.route([
+    server.route([
       {
         method: "DELETE",
         path: `/session`,
