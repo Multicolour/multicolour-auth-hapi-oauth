@@ -200,16 +200,16 @@ class Multicolour_Auth_OAuth extends Map {
         // Create the session.
         sessions.create(session, err => {
           if (err) {
-            reply[host.request("decorator")](Boom.wrap(err))
+            reply[host.request("decorator")](Boom.wrap(err), sessions)
           }
           else {
             sessions.find(session).populate("user").exec((err, new_session) => {
               if (err) {
-                reply[host.request("decorator")](Boom.wrap(err))
+                reply[host.request("decorator")](Boom.wrap(err), sessions)
               }
               else {
                 // Redirect.
-                reply[host.request("decorator")](new_session)
+                reply[host.request("decorator")](new_session, sessions)
               }
             })
           }
