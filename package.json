@@ -1,6 +1,6 @@
 {
   "name": "multicolour-auth-oauth",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "OAuth auth plugin for Multicolour Servers",
   "main": "index.js",
   "scripts": {
