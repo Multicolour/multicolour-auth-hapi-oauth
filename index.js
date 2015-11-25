@@ -6,6 +6,9 @@ const Boom = require("boom")
 // Get the user model.
 const session = require("./lib/session_model")
 
+// Get the validation library.
+const joi = require("joi")
+
 class Multicolour_Auth_OAuth extends Map {
 
   constructor(generator) {
@@ -17,7 +20,7 @@ class Multicolour_Auth_OAuth extends Map {
 
     // Set the defaults.
     this
-      .set("auth_names", ["session_store"])
+      .set("auth_config", { strategy: "session_store" })
       .set("generator", generator)
       .set("sessions", session(host.get("env")))
   }
@@ -35,6 +38,14 @@ class Multicolour_Auth_OAuth extends Map {
 
     // Get the config.
     const config = host.get("config").get("auth")
+
+    generator
+      // Get the token for use in the routes.
+      .reply("auth_config", this.get("auth_config"))
+
+      // Add another header to validate.
+      .request("header_validator")
+        .set("authorization", joi.string().required())
 
     // Register the session model with the hosting Multicolour's Waterline instance.
     host.request("waterline").loadCollection(this.get("sessions"))
@@ -62,9 +73,6 @@ class Multicolour_Auth_OAuth extends Map {
       server.auth.strategy("session_store", "session_store", { host })
       server.auth.default("session_store")
     })
-
-    // Get the token for use in the routes.
-    generator.set("auth_names", this.get("auth_names"))
 
     // Get the handlers.
     const handlers = this.handlers()
