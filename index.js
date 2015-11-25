@@ -121,9 +121,6 @@ class Multicolour_Auth_OAuth extends Map {
     // Get the host.
     const host = this.get("generator").request("host")
 
-    // Get the auth config.
-    const config = host.get("config").get("auth")
-
     // Get the models.
     const models = host.get("database").get("models")
 
@@ -176,11 +173,11 @@ class Multicolour_Auth_OAuth extends Map {
               else {
                 sessions.find(session).populate("user").exec((err, new_session) => {
                   if (err) {
-                    reply(Boom.wrap(err))
+                    reply[host.request("decorator")](Boom.wrap(err), sessions)
                   }
                   else {
                     // Redirect.
-                    reply(new_session)
+                    reply[host.request("decorator")](new_session, sessions)
                   }
                 })
               }
