@@ -154,7 +154,7 @@ class Multicolour_Auth_OAuth extends Map {
     // one for them and log them in with it.
     users.findOne({ username: profile.profile.username }, (err, found_user) => {
       if (err) {
-        reply(Boom.wrap(err))
+        reply[host.request("decorator")](Boom.wrap(err))
       }
       else if (!found_user) {
         users.create({
@@ -167,7 +167,7 @@ class Multicolour_Auth_OAuth extends Map {
         },
         (err, created_user) => {
           if (err) {
-            reply(Boom.wrap(err))
+            reply[host.request("decorator")](Boom.wrap(err))
           }
           else {
             // Add the user id to the session record.
@@ -176,7 +176,7 @@ class Multicolour_Auth_OAuth extends Map {
             // Create the session.
             sessions.create(session, err => {
               if (err) {
-                reply(Boom.wrap(err))
+                reply[host.request("decorator")](Boom.wrap(err))
               }
               else {
                 sessions.find(session).populate("user").exec((err, new_session) => {
@@ -200,16 +200,16 @@ class Multicolour_Auth_OAuth extends Map {
         // Create the session.
         sessions.create(session, err => {
           if (err) {
-            reply(Boom.wrap(err))
+            reply[host.request("decorator")](Boom.wrap(err))
           }
           else {
             sessions.find(session).populate("user").exec((err, new_session) => {
               if (err) {
-                reply(Boom.wrap(err))
+                reply[host.request("decorator")](Boom.wrap(err))
               }
               else {
                 // Redirect.
-                reply(new_session)
+                reply[host.request("decorator")](new_session)
               }
             })
           }
@@ -230,7 +230,7 @@ class Multicolour_Auth_OAuth extends Map {
   destroy(request, reply) {
     // If it's not an authorised request, exit.
     if (!request.auth.isAuthenticated) {
-      return reply(Boom.unauthorized(request.auth.error.message))
+      return reply[host.request("decorator")](Boom.unauthorized(request.auth.error.message))
     }
 
     // Get the host.
