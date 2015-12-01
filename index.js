@@ -20,7 +20,7 @@ class Multicolour_Auth_OAuth extends Map {
 
     // Set the defaults.
     this
-      .set("auth_config", { strategy: "session_store" })
+      .set("auth_config", "session_store")
       .set("generator", generator)
       .set("sessions", session(host.get("env")))
   }
@@ -163,7 +163,8 @@ class Multicolour_Auth_OAuth extends Map {
           source: profile.provider,
           profile_image_url: profile.profile.raw.profile_image_url.replace(/_normal/, ""),
           requires_password: true,
-          requires_email: true
+          requires_email: true,
+          role: "user"
         },
         (err, created_user) => {
           if (err) {
