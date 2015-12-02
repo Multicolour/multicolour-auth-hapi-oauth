@@ -76,6 +76,8 @@ class Multicolour_Auth_OAuth extends Map {
 
     // Get the handlers.
     const handlers = this.handlers()
+    const headers = host.request("header_validator").get()
+    delete headers.authorization
 
     // Create login/register endpoints with the config.
     config.providers.forEach(auth_config => {
@@ -113,6 +115,27 @@ class Multicolour_Auth_OAuth extends Map {
       }
     ])
 
+    server.route([
+      {
+        method: "POST",
+        path: `/session/login`,
+        config: {
+          auth: false,
+          handler: handlers.get("from_username_password"),
+          description: "Login as a user using username and password.",
+          notes: "Create a session with user credentials.",
+          tags: ["api", "auth"],
+          validate: {
+            payload: joi.object({
+              username: joi.string().required(),
+              password: joi.string().required()
+            }),
+            headers: joi.object(headers).options({ allowUnknown: true })
+          }
+        }
+      }
+    ])
+
     return this
   }
 
@@ -135,8 +158,9 @@ class Multicolour_Auth_OAuth extends Map {
     // Get the user and session models.
     const users = models.user
     const sessions = models.session
+    const utils = require("multicolour/lib/utils")
 
-    // Create the session row.
+    // Create the session.
     const session = {
       token: request.url.query.oauth_token,
       verifier: request.url.query.oauth_verifier,
@@ -164,6 +188,7 @@ class Multicolour_Auth_OAuth extends Map {
           profile_image_url: profile.profile.raw.profile_image_url.replace(/_normal/, ""),
           requires_password: true,
           requires_email: true,
+          salt: utils.create_salt(),
           role: "user"
         },
         (err, created_user) => {
@@ -222,6 +247,88 @@ class Multicolour_Auth_OAuth extends Map {
     return reply
   }
 
+  from_username_password(request, reply) {
+    // Get the host.
+    const host = this.get("generator").request("host")
+
+    // Get the models.
+    const models = host.get("database").get("models")
+
+    // Get utils from multicolour.
+    const utils = require("multicolour/lib/utils")
+
+    // Get the user and session models.
+    models.user.findOne({
+      username: request.payload.username,
+      requires_password: false
+    }, (err, found_user) => {
+      // Check for errors.
+      if (err) {
+        reply[host.request("decorator")](Boom.wrap(err), models.session)
+      }
+      // Check we found a user by that username
+      // that doesn't require a password.
+      else if (!found_user) {
+        reply[host.request("decorator")](
+          Boom.unauthorized("Incorrect username or password."),
+          models.session
+        )
+      }
+      // Otherwise, hash the password and search again.
+      else {
+        // Hash the password.
+        utils.hash_password(request.payload.password, found_user.salt, password => {
+          // Do another search for the user
+          // with the hashed password & salt.
+          models.user.findOne({
+            username: request.payload.username,
+            requires_password: false,
+            password
+          }, err => {
+            // Check for errors.
+            if (err) {
+              reply[host.request("decorator")](Boom.wrap(err), models.session)
+            }
+            // Check we found a user
+            else if (!found_user) {
+              reply[host.request("decorator")](
+                Boom.unauthorized("Incorrect username or password."),
+                models.session
+              )
+            }
+            // Create the session.
+            else {
+              models.session.create({
+                token: utils.create_salt(),
+                user: found_user.id
+              }, (err, created_session) => {
+                // Check for errors.
+                if (err) {
+                  reply[host.request("decorator")](Boom.wrap(err), models.session)
+                }
+                else {
+                  // Get the session and user details to form the reply.
+                  models.session
+                    .findOne(created_session)
+                    .populate("user")
+                    .exec((err, response) => {
+                      if (err) {
+                        reply[host.request("decorator")](Boom.wrap(err), models.session)
+                      }
+                      else {
+                        response.user = response.user.toJSON()
+                        reply[host.request("decorator")](response.toJSON(), models.session)
+                      }
+                    })
+                }
+              })
+            }
+          })
+        })
+      }
+    })
+  }
+
   /**
    * Destroy the session.
    * @param  {Request} request object.
@@ -254,7 +361,8 @@ class Multicolour_Auth_OAuth extends Map {
   handlers() {
     return new Map([
       ["create", this.create.bind(this)],
-      ["destroy", this.destroy.bind(this)]
+      ["destroy", this.destroy.bind(this)],
+      ["from_username_password", this.from_username_password.bind(this)]
     ])
   }
 }
