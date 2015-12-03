@@ -96,6 +96,11 @@ class Multicolour_Auth_OAuth extends Map {
           tags: ["api", "auth", auth_config.provider]
         }
       })
+
+      // Get any other info about this provider,
+      // ignore any errors here.
+      const provider = require(`./lib/providers/${auth_config.provider}`)
+      provider.get_extra_routes(host, server)
     })
 
     // Register some auth routes.
@@ -112,10 +117,7 @@ class Multicolour_Auth_OAuth extends Map {
           notes: `Delete a session permanently.`,
           tags: ["api", "auth"]
         }
-      }
-    ])
-
-    server.route([
+      },
       {
         method: "POST",
         path: `/session/login`,
@@ -158,6 +160,8 @@ class Multicolour_Auth_OAuth extends Map {
     // Get the user and session models.
     const users = models.user
     const sessions = models.session
+
+    // Get utils from Multicolour.
     const utils = require("multicolour/lib/utils")
 
     // Create the session.
