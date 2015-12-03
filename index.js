@@ -257,6 +257,9 @@ class Multicolour_Auth_OAuth extends Map {
     // Get utils from multicolour.
     const utils = require("multicolour/lib/utils")
 
+    // Get the registered decorator.
+    const decorator = host.request("decorator")
+
     // Get the user and session models.
     models.user.findOne({
       username: request.payload.username,
@@ -264,12 +267,12 @@ class Multicolour_Auth_OAuth extends Map {
     }, (err, found_user) => {
       // Check for errors.
       if (err) {
-        reply[host.request("decorator")](Boom.wrap(err), models.session)
+        reply[decorator](Boom.wrap(err), models.session)
       }
       // Check we found a user by that username
       // that doesn't require a password.
       else if (!found_user) {
-        reply[host.request("decorator")](
+        reply[decorator](
           Boom.unauthorized("Incorrect username or password."),
           models.session
         )
@@ -287,11 +290,11 @@ class Multicolour_Auth_OAuth extends Map {
           }, err => {
             // Check for errors.
             if (err) {
-              reply[host.request("decorator")](Boom.wrap(err), models.session)
+              reply[decorator](Boom.wrap(err), models.session)
             }
             // Check we found a user
             else if (!found_user) {
-              reply[host.request("decorator")](
+              reply[decorator](
                 Boom.unauthorized("Incorrect username or password."),
                 models.session
               )
@@ -304,7 +307,7 @@ class Multicolour_Auth_OAuth extends Map {
               }, (err, created_session) => {
                 // Check for errors.
                 if (err) {
-                  reply[host.request("decorator")](Boom.wrap(err), models.session)
+                  reply[decorator](Boom.wrap(err), models.session)
                 }
                 else {
                   // Get the session and user details to form the reply.
@@ -313,11 +316,11 @@ class Multicolour_Auth_OAuth extends Map {
                     .populate("user")
                     .exec((err, response) => {
                       if (err) {
-                        reply[host.request("decorator")](Boom.wrap(err), models.session)
+                        reply[decorator](Boom.wrap(err), models.session)
                       }
                       else {
                         response.user = response.user.toJSON()
-                        reply[host.request("decorator")](response.toJSON(), models.session)
+                        reply[decorator](response.toJSON(), models.session)
                       }
                     })
                 }
