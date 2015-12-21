@@ -13,39 +13,67 @@ const multicolour = new (require("multicolour"))({
     isSecure: true,
     providers: new Set([
       {
-        password: "nwc",
-        provider: "nwc"
+        provider: "twitter",
+        clientId: "brugwhbiguw",
+        clientSecret: "brugwhbiguw",
+        isSecure: false
       }
     ])
+  },
+  db: {
+    adapters: {
+      development: require("sails-memory")
+    },
+    connections: {
+      development: {
+        adapter: "development",
+        host: "localhost",
+        port: 27017,
+        database: "multicolour"
+      }
+    }
   }
 }).scan()
 
-// Get the plugin we're testing.
 const Test_Server_Plugin = require("./test_content/server")
-
-// Fluff some stuff the test environment won't automagically do for us.
-multicolour.extend(Test_Server_Plugin)
-Test_Server_Plugin.reply("host", multicolour)
+multicolour.use(Test_Server_Plugin)
 
 // Used in our tests.
 const request = {
+  headers: {
+    authorization: "Bearer whatever"
+  },
   auth: {
     isAuthenticated: false,
     error: {
       message: ""
     },
-    credentials: {},
+    credentials: {
+      user: {
+        id: 1
+      },
+      profile: {
+        raw: {
+          profile_image_url: ""
+        }
+      }
+    },
     session: {
       clear: () => this
+    }
+  },
+  url: {
+    query: {
+      oauth_token: ""
     }
   }
 }
 const reply = () => { return { code: () => this } }
-reply.continue = () => this
+reply.test = () => {}
+reply.continue = () => {}
 
 tape("Can register the plugin", test => {
   // Some stupid tests for sanity.
-  test.ok(multicolour.use(Test_Server_Plugin), "Stupid test, make sure test server plugin is okay.")
   test.ok(multicolour.get("server"), "Stupid test, make sure test server is registered.")
 
   // Onto our real tests.
@@ -61,17 +89,17 @@ tape("Can register the plugin", test => {
 
 tape("Handlers is as expected", test => {
   const handlers = multicolour.get("server").request("auth_plugin").handlers()
+  multicolour.get("database").start(() => {
+    test.ok(handlers.has("create"), "Has a session creation function")
+    test.ok(handlers.has("destroy"), "Has a session destruction function")
 
-  test.ok(handlers.has("create"), "Has a session creation function")
-  test.ok(handlers.has("destroy"), "Has a session destruction function")
+    test.ok(handlers.get("create")(request, reply), "Creation works as expected and 'replies' with a boom error.")
 
-  test.ok(handlers.get("create")(request, reply), "Creation works as expected and 'replies' with a boom error.")
+    request.auth.isAuthenticated = true
 
-  request.auth.isAuthenticated = true
-  request.auth.credentials = true
+    test.ok(handlers.get("create")(request, reply), "Creation works as expected and continues past error.")
+    test.ok(handlers.get("destroy")(request, reply), "Destroy works as expected.")
 
-  test.ok(handlers.get("create")(request, reply), "Creation works as expected and continues past error.")
-  test.ok(handlers.get("destroy")(request, reply), "Destroy works as expected.")
-
-  test.end()
+    test.end()
+  })
 })

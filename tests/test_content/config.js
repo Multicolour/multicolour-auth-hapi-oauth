@@ -1,8 +1,5 @@
 "use strict"
 
-// Get the path library to resolve where the content is.
-const path = require("path")
-
 module.exports = {
   // Where is your content? blueprints, etc
   content: `${__dirname}/`,
@@ -24,18 +21,10 @@ module.exports = {
   // Set up our desired database adapter (defaults to Mongo)
   db: {
     adapters: {
-      development: null,
-      production: null
+      development: require("sails-memory")
     },
     connections: {
       development: {
-        adapter: "production",
-        host: "localhost",
-        port: 27017,
-        database: "multicolour"
-      },
-
-      production: {
         adapter: "production",
         host: "localhost",
         port: 27017,

@@ -1,7 +1,7 @@
 "use strict"
 
 module.exports = {
-  blueprint: {
+  attributes: {
     name: {
       required: true,
       type: "string"

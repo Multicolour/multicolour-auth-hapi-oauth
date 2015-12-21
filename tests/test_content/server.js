@@ -1,5 +1,14 @@
 "use strict"
 
+class headers {
+  set() {}
+  get() {
+    return {
+      accept: "garbage"
+    }
+  }
+}
+
 class Test_Server_Plugin extends Map {
   constructor() {
     super()
@@ -8,24 +17,30 @@ class Test_Server_Plugin extends Map {
       .reply("server", {})
       .reply("raw", {
         register: (what, callback) => callback(),
+        route: () => {},
         auth: {
-          strategy: () => {}
+          strategy: () => {},
+          default: () => {}
         }
       })
   }
 
-  use(plugin_conf) {
-    const new_plugin = new plugin_conf.plugin(this)
+  register(multicolour) {
+    multicolour
+      .reply("header_validator", new headers())
+      .reply("decorator", "test")
+      .set("server", this)
+  }
 
-    new_plugin.register()
+  use(plugin_conf) {
+    const new_plugin = new plugin_conf(this)
+
+    new_plugin.register(this)
     this.reply("auth_plugin", new_plugin)
     return this
   }
 
-  warn() { return this }
-
   start() { return this }
-
   stop() { return this }
 }
 
