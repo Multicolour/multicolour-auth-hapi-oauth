@@ -106,16 +106,38 @@ class Multicolour_Auth_OAuth extends Map {
     // Register some auth routes.
     server.route([
       {
-        method: "DELETE",
-        path: `/session`,
+        method: "GET",
+        path: `/session/verify`,
         config: {
           auth: {
             strategies: this.get("auth_names")
           },
+          handler: (request, reply) => reply({}),
+          description: `Verify a session.`,
+          notes: `Verify a session.`,
+          tags: ["api", "auth"],
+          validate: {
+            headers: joi.object(host.request("header_validator").get())
+              .options({ allowUnknown: true })
+          }
+        }
+      },
+      {
+        method: "DELETE",
+        path: `/session`,
+        config: {
+          auth: {
+            strategies: this.get("auth_names"),
+            scope: [ "user" ]
+          },
           handler: handlers.get("destroy"),
           description: `Delete a session.`,
           notes: `Delete a session permanently.`,
-          tags: ["api", "auth"]
+          tags: ["api", "auth"],
+          validate: {
+            headers: joi.object(host.request("header_validator").get())
+              .options({ allowUnknown: true })
+          }
         }
       },
       {
@@ -352,10 +374,20 @@ class Multicolour_Auth_OAuth extends Map {
     const host = this.get("generator").request("host")
 
     // Get the models.
-    const session = host.get("database").get("models").session
+    const sessions = host.get("database").get("models").session
 
-    // Keep on swimming, keep on swimming.
-    reply.continue()
+    // Destroy the record in the database.
+    sessions.destroy({
+      user: request.auth.credentials.user.id,
+      token: request.headers.authorization.split(" ")[1]
+    }, err => {
+      if (err) {
+        reply[host.request("decorator")](err, sessions)
+      }
+      else {
+        reply({})
+      }
+    })
 
     return reply
   }
