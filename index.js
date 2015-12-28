@@ -76,7 +76,7 @@ class Multicolour_Auth_OAuth extends Map {
 
     // Get the handlers.
     const handlers = this.handlers()
-    const headers = host.request("header_validator").get()
+    const headers = joi.object(host.request("header_validator").get()).options({ allowUnknown: true })
     delete headers.authorization
 
     // Create login/register endpoints with the config.
@@ -103,23 +103,33 @@ class Multicolour_Auth_OAuth extends Map {
       provider.get_extra_routes(host, server)
     })
 
+    const strategies = this.get("auth_names")
+
     // Register some auth routes.
     server.route([
       {
         method: "GET",
-        path: `/session/verify`,
+        path: `/session`,
         config: {
-          auth: {
-            strategies: this.get("auth_names")
+          auth: { strategies },
+          handler: (request, reply) => {
+            // Get the handlers.
+            const handlers = require("multicolour/lib/handlers")
+
+            // Get the model.
+            const model = host.get("database").get("models").session
+
+            // Set the host on the handlers.
+            handlers.set_host(host)
+
+            // Run the query.
+            handlers.GET.bind(model)(request, (err, models) =>
+              reply[host.request("decorator")](err || models, model))
           },
-          handler: (request, reply) => reply({}),
-          description: `Verify a session.`,
-          notes: `Verify a session.`,
+          description: `Get your session and profile.`,
+          notes: `Get your session and profile.`,
           tags: ["api", "auth"],
-          validate: {
-            headers: joi.object(host.request("header_validator").get())
-              .options({ allowUnknown: true })
-          }
+          validate: { headers }
         }
       },
       {
@@ -127,17 +137,14 @@ class Multicolour_Auth_OAuth extends Map {
         path: `/session`,
         config: {
           auth: {
-            strategies: this.get("auth_names"),
+            strategies,
             scope: [ "user" ]
           },
           handler: handlers.get("destroy"),
           description: `Delete a session.`,
           notes: `Delete a session permanently.`,
           tags: ["api", "auth"],
-          validate: {
-            headers: joi.object(host.request("header_validator").get())
-              .options({ allowUnknown: true })
-          }
+          validate: { headers }
         }
       },
       {
@@ -154,7 +161,7 @@ class Multicolour_Auth_OAuth extends Map {
               username: joi.string().required(),
               password: joi.string().required()
             }),
-            headers: joi.object(headers).options({ allowUnknown: true })
+            headers
           }
         }
       }
