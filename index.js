@@ -183,6 +183,9 @@ class Multicolour_Auth_OAuth extends Map {
     // Get the host.
     const host = this.get("generator").request("host")
 
+    // Get any redirect config.
+    const redirect_to = host.get("config").get("auth").redirect
+
     // Get the models.
     const models = host.get("database").get("models")
 
@@ -237,6 +240,10 @@ class Multicolour_Auth_OAuth extends Map {
               if (err) {
                 reply[host.request("decorator")](Boom.wrap(err))
               }
+              // If there's a configured redirect, do that.
+              else if (redirect_to) {
+                reply.redirect(`${redirect_to}/${session.token}`)
+              }
               else {
                 sessions.find(session).populate("user").exec((err, new_session) => {
                   if (err) {
@@ -266,8 +273,12 @@ class Multicolour_Auth_OAuth extends Map {
               if (err) {
                 reply[host.request("decorator")](Boom.wrap(err), sessions)
               }
+              // If there's a configured redirect, do that.
+              else if (redirect_to) {
+                reply.redirect(`${redirect_to}/${session.token}`)
+              }
               else {
-                // Redirect.
+                // Reply.
                 reply[host.request("decorator")](new_session, sessions)
               }
             })
