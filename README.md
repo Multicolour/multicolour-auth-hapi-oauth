@@ -1,8 +1,8 @@
 # multicolour-auth-oauth
 
-[![Build Status](https://travis-ci.org/newworldcode/multicolour-auth-oauth.svg)](https://travis-ci.org/newworldcode/multicolour-auth-oauth)
-[![Coverage Status](https://coveralls.io/repos/newworldcode/multicolour-auth-oauth/badge.svg?branch=master&service=github)](https://coveralls.io/github/newworldcode/multicolour-auth-oauth?branch=master)
-[![Dependency Status](https://david-dm.org/newworldcode/multicolour-auth-oauth.svg)](https://david-dm.org/newworldcode/multicolour-auth-oauth)
+[![Build Status](https://travis-ci.org/Multicolour/multicolour-auth-hapi-oauth.svg?branch=master)](https://travis-ci.org/Multicolour/multicolour-auth-hapi-oauth)
+[![Coverage Status](https://coveralls.io/repos/github/Multicolour/multicolour-auth-hapi-oauth/badge.svg?branch=master)](https://coveralls.io/github/Multicolour/multicolour-auth-hapi-oauth?branch=master)
+[![Dependency Status](https://david-dm.org/Multicolour/multicolour-auth-hapi-oauth.svg)](https://david-dm.org/Multicolour/multicolour-auth-hapi-oauth)
 
 OAuth auth plugin for Multicolour Servers, is a wrapper around the [Bell][bell] library.
 
