@@ -1,6 +1,6 @@
 {
   "name": "multicolour-auth-oauth",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "description": "OAuth auth plugin for Multicolour HapiJS Servers",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/newworldcode/multicolour-auth-oauth.git"
+    "url": "git+https://github.com/Multicolour/multicolour-auth-oauth.git"
   },
   "keywords": [
     "oauth",
@@ -18,9 +18,9 @@
   "author": "newworldcode <hello@newworld.codes> (https://newworld.codes)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/newworldcode/multicolour-auth-oauth/issues"
+    "url": "https://github.com/Multicolour/multicolour-auth-oauth/issues"
   },
-  "homepage": "https://github.com/newworldcode/multicolour-auth-oauth#readme",
+  "homepage": "https://github.com/Multicolour/multicolour-auth-oauth#readme",
   "devDependencies": {
     "eslint": "^1.5.1",
     "istanbul": "^0.4.1",
@@ -31,9 +31,9 @@
   "dependencies": {
     "bell": "^6.0.0",
     "boom": "^3.0.0",
-    "hapi": "^11.1.2",
+    "hapi": "^12.1.0",
     "joi": "^7.0.0",
-    "multicolour": "^0.2.2",
+    "multicolour": "^0.2.7",
     "request": "^2.67.0",
     "waterline": "^0.10.28"
   }
