@@ -76,8 +76,13 @@ class Multicolour_Auth_OAuth extends Map {
 
     // Get the handlers.
     const handlers = this.handlers()
-    const headers = joi.object(host.request("header_validator").get()).options({ allowUnknown: true })
-    delete headers.authorization
+
+    // Get the headers, without auth.
+    const raw_headers = host.request("header_validator").get()
+    delete raw_headers.authorization
+
+    // Create a schema from the headers.
+    const headers = joi.object(raw_headers).options({ allowUnknown: true })
 
     // Create login/register endpoints with the config.
     config.providers.forEach(auth_config => {
@@ -109,7 +114,7 @@ class Multicolour_Auth_OAuth extends Map {
     server.route([
       {
         method: "GET",
-        path: `/session`,
+        path: "/session",
         config: {
           auth: { strategies },
           handler: (request, reply) => {
@@ -126,30 +131,30 @@ class Multicolour_Auth_OAuth extends Map {
             handlers.GET.bind(model)(request, (err, models) =>
               reply[host.request("decorator")](err || models, model))
           },
-          description: `Get your session and profile.`,
-          notes: `Get your session and profile.`,
+          description: "Get your session and profile.",
+          notes: "Get your session and profile.",
           tags: ["api", "auth"],
           validate: { headers }
         }
       },
       {
         method: "DELETE",
-        path: `/session`,
+        path: "/session",
         config: {
           auth: {
             strategies,
             scope: [ "user" ]
           },
           handler: handlers.get("destroy"),
-          description: `Delete a session.`,
-          notes: `Delete a session permanently.`,
+          description: "Delete a session.",
+          notes: "Delete a session permanently.",
           tags: ["api", "auth"],
           validate: { headers }
         }
       },
       {
         method: "POST",
-        path: `/session/login`,
+        path: "/session/login",
         config: {
           auth: false,
           handler: handlers.get("from_username_password"),
