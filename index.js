@@ -129,7 +129,7 @@ class Multicolour_Auth_OAuth extends Map {
 
             // Run the query.
             handlers.GET.bind(model)(request, (err, models) =>
-              reply[host.request("decorator")](err || models, model))
+              reply[request.headers.accept.toString()](err || models, model))
           },
           description: "Get your session and profile.",
           notes: "Get your session and profile.",
@@ -219,7 +219,7 @@ class Multicolour_Auth_OAuth extends Map {
     // one for them and log them in with it.
     users.findOne({ username: profile.profile.username }, (err, found_user) => {
       if (err) {
-        reply[host.request("decorator")](Boom.wrap(err))
+        reply[request.headers.accept.toString()](Boom.wrap(err))
       }
       else if (!found_user) {
         users.create({
@@ -234,7 +234,7 @@ class Multicolour_Auth_OAuth extends Map {
         },
         (err, created_user) => {
           if (err) {
-            reply[host.request("decorator")](Boom.wrap(err))
+            reply[request.headers.accept.toString()](Boom.wrap(err))
           }
           else {
             // Add the user id to the session record.
@@ -243,7 +243,7 @@ class Multicolour_Auth_OAuth extends Map {
             // Create the session.
             sessions.create(session, err => {
               if (err) {
-                reply[host.request("decorator")](Boom.wrap(err))
+                reply[request.headers.accept.toString()](Boom.wrap(err))
               }
               // If there's a configured redirect, do that.
               else if (redirect_to) {
@@ -252,11 +252,11 @@ class Multicolour_Auth_OAuth extends Map {
               else {
                 sessions.find(session).populate("user").exec((err, new_session) => {
                   if (err) {
-                    reply[host.request("decorator")](Boom.wrap(err), sessions)
+                    reply[request.headers.accept.toString()](Boom.wrap(err), sessions)
                   }
                   else {
                     // Redirect.
-                    reply[host.request("decorator")](new_session, sessions)
+                    reply[request.headers.accept.toString()](new_session, sessions)
                   }
                 })
               }
@@ -271,12 +271,12 @@ class Multicolour_Auth_OAuth extends Map {
         // Create the session.
         sessions.create(session, err => {
           if (err) {
-            reply[host.request("decorator")](Boom.wrap(err), sessions)
+            reply[request.headers.accept.toString()](Boom.wrap(err), sessions)
           }
           else {
             sessions.find(session).populate("user").exec((err, new_session) => {
               if (err) {
-                reply[host.request("decorator")](Boom.wrap(err), sessions)
+                reply[request.headers.accept.toString()](Boom.wrap(err), sessions)
               }
               // If there's a configured redirect, do that.
               else if (redirect_to) {
@@ -284,7 +284,7 @@ class Multicolour_Auth_OAuth extends Map {
               }
               else {
                 // Reply.
-                reply[host.request("decorator")](new_session, sessions)
+                reply[request.headers.accept.toString()](new_session, sessions)
               }
             })
           }
@@ -307,7 +307,7 @@ class Multicolour_Auth_OAuth extends Map {
     const utils = require("multicolour/lib/utils")
 
     // Get the registered decorator.
-    const decorator = host.request("decorator")
+    const decorator = request.headers.accept.toString()
 
     // Get the user and session models.
     models.user.findOne({
@@ -390,7 +390,7 @@ class Multicolour_Auth_OAuth extends Map {
   destroy(request, reply) {
     // If it's not an authorised request, exit.
     if (!request.auth.isAuthenticated) {
-      return reply[host.request("decorator")](Boom.unauthorized(request.auth.error.message))
+      return reply[request.headers.accept.toString()](Boom.unauthorized(request.auth.error.message))
     }
 
     // Get the host.
@@ -405,7 +405,7 @@ class Multicolour_Auth_OAuth extends Map {
       token: request.headers.authorization.split(" ")[1]
     }, err => {
       if (err) {
-        reply[host.request("decorator")](err, sessions)
+        reply[request.headers.accept.toString()](err, sessions)
       }
       else {
         reply({})
