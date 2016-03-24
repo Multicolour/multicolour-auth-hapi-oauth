@@ -4,7 +4,7 @@ class headers {
   set() {}
   get() {
     return {
-      accept: "garbage"
+      accept: "application/json"
     }
   }
 }
