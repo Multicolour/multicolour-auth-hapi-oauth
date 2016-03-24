@@ -2,33 +2,55 @@
 
 module.exports = {
   // Where is your content? blueprints, etc
-  content: `${__dirname}/`,
+  content: __dirname,
 
-  // Are you developing? true or false
-  debug: process.env.NODE_ENV !== "production",
+  auth: {
+    password: "1234",
+    providers: [
+      {
+        provider: "twitter",
+        clientId: "brugwhbiguw",
+        clientSecret: "brugwhbiguw",
+        isSecure: false
+      }
+    ]
+  },
 
-  // Configure our servers, api and frontend.
-  http: {
-    // Configures the REST server.
-    api: {
-      host: "localhost",
-      port: 1811,
-      routes: { cors: true },
-      router: { stripTrailingSlash: true }
-    }
+  // Configure the Hapi server.
+  // These objects are passed directly to Hapi
+  // and are not abstracted at all, all config
+  // available to Hapi are available to Multicolour.
+  api_connections: {
+    port: 1811,
+    host: "localhost", // Uncomment if you dont want to bind on all network devices.
+    routes: {
+      cors: {
+        // You should update this to reflect only
+        // the domains you wish to allow access to
+        // the API being generated.
+        origin: [ "localhost:1811" ]
+      }
+    },
+    router: { stripTrailingSlash: true }
+  },
+
+  api_server: {
+    connections: {
+      routes: {
+        security: true
+      }
+    },
+    debug: { request: ["error"] }
   },
 
   // Set up our desired database adapter (defaults to Mongo)
   db: {
     adapters: {
-      development: require("sails-memory")
+      memory: require("sails-memory")
     },
     connections: {
       development: {
-        adapter: "production",
-        host: "localhost",
-        port: 27017,
-        database: "multicolour"
+        adapter: "memory"
       }
     }
   }
