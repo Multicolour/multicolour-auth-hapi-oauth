@@ -3,9 +3,6 @@
 // Get the boom library for errors.
 const Boom = require("boom")
 
-// Get the user model.
-const session = require("./lib/session_model")
-
 // Get the validation library.
 const joi = require("joi")
 
@@ -22,7 +19,6 @@ class Multicolour_Auth_OAuth extends Map {
     this
       .set("auth_config", "session_store")
       .set("generator", generator)
-      .set("sessions", session(host.get("env")))
   }
 
   /**
@@ -40,6 +36,8 @@ class Multicolour_Auth_OAuth extends Map {
     const config = host.get("config").get("auth")
 
     generator
+      .reply("auth_plugin", this)
+
       // Get the token for use in the routes.
       .reply("auth_config", this.get("auth_config"))
 
@@ -48,7 +46,7 @@ class Multicolour_Auth_OAuth extends Map {
         .set("authorization", joi.string().required())
 
     // Register the session model with the hosting Multicolour's Waterline instance.
-    host.request("waterline").loadCollection(this.get("sessions"))
+    host.get("database").get("definitions").session = require("./lib/session_model")
 
     // Register the plugins to the server.
     server.register([
@@ -57,6 +55,7 @@ class Multicolour_Auth_OAuth extends Map {
     ], error => {
       // Check for errors.
       if (error) {
+        /* istanbul ignore next : Untestable */
         throw error
       }
 
@@ -195,7 +194,7 @@ class Multicolour_Auth_OAuth extends Map {
     const models = host.get("database").get("models")
 
     // Get the user and session models.
-    const users = models.user
+    const users = models.multicolour_user
     const sessions = models.session
 
     // Get utils from Multicolour.
@@ -388,10 +387,8 @@ class Multicolour_Auth_OAuth extends Map {
    * @return {Reply} Reply interface for internal use.
    */
   destroy(request, reply) {
-    // If it's not an authorised request, exit.
-    if (!request.auth.isAuthenticated) {
-      return reply[request.headers.accept.toString()](Boom.unauthorized(request.auth.error.message))
-    }
+    // Get the decorator name.
+    const decorator = request.headers.accept || "application/json"
 
     // Get the host.
     const host = this.get("generator").request("host")
@@ -399,16 +396,21 @@ class Multicolour_Auth_OAuth extends Map {
     // Get the models.
     const sessions = host.get("database").get("models").session
 
+    // If it's not an authorised request, exit.
+    if (!request.auth.isAuthenticated) {
+      return reply[decorator](Boom.unauthorized(request.auth.error.message), sessions)
+    }
+
     // Destroy the record in the database.
     sessions.destroy({
       user: request.auth.credentials.user.id,
       token: request.headers.authorization.split(" ")[1]
     }, err => {
       if (err) {
-        reply[request.headers.accept.toString()](err, sessions)
+        reply[decorator](err, sessions)
       }
       else {
-        reply({})
+        reply[decorator]({}, sessions)
       }
     })
 
