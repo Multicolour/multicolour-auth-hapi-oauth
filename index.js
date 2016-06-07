@@ -182,7 +182,7 @@ class Multicolour_Auth_OAuth extends Map {
    */
   create(request, reply) {
     // Get the profile from the request.
-    const profile = request.auth.credentials
+    const profile = request.auth.credentials || {}
 
     // Get the host.
     const host = this.get("generator").request("host")
