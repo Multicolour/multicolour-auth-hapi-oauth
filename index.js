@@ -12,9 +12,6 @@ class Multicolour_Auth_OAuth extends Map {
     // Construct.
     super()
 
-    // Get the host.
-    const host = generator.request("host")
-
     // Set the defaults.
     this
       .set("auth_config", "session_store")
@@ -180,7 +177,10 @@ class Multicolour_Auth_OAuth extends Map {
    * @param  {Reply} reply interface.
    * @return {Reply} Reply interface for internal use.
    */
-  create(request, reply) {
+  create(request, reply_interface) {
+    // Get the reply interface.
+    const reply = this.get("generator").get_decorator_for_apply_value(reply_interface, request.headers.accept)
+
     // Get the profile from the request.
     const profile = request.auth.credentials || {}
 
@@ -218,7 +218,7 @@ class Multicolour_Auth_OAuth extends Map {
     // one for them and log them in with it.
     users.findOne({ username: profile.profile.username }, (err, found_user) => {
       if (err) {
-        reply[request.headers.accept.toString()](Boom.wrap(err))
+        reply(Boom.wrap(err))
       }
       else if (!found_user) {
         users.create({
@@ -233,7 +233,7 @@ class Multicolour_Auth_OAuth extends Map {
         },
         (err, created_user) => {
           if (err) {
-            reply[request.headers.accept.toString()](Boom.wrap(err))
+            reply(Boom.wrap(err))
           }
           else {
             // Add the user id to the session record.
@@ -242,7 +242,7 @@ class Multicolour_Auth_OAuth extends Map {
             // Create the session.
             sessions.create(session, err => {
               if (err) {
-                reply[request.headers.accept.toString()](Boom.wrap(err))
+                reply(Boom.wrap(err))
               }
               // If there's a configured redirect, do that.
               else if (redirect_to) {
@@ -251,11 +251,11 @@ class Multicolour_Auth_OAuth extends Map {
               else {
                 sessions.find(session).populate("user").exec((err, new_session) => {
                   if (err) {
-                    reply[request.headers.accept.toString()](Boom.wrap(err), sessions)
+                    reply(Boom.wrap(err), sessions)
                   }
                   else {
                     // Redirect.
-                    reply[request.headers.accept.toString()](new_session, sessions)
+                    reply(new_session, sessions)
                   }
                 })
               }
@@ -270,12 +270,12 @@ class Multicolour_Auth_OAuth extends Map {
         // Create the session.
         sessions.create(session, err => {
           if (err) {
-            reply[request.headers.accept.toString()](Boom.wrap(err), sessions)
+            reply(Boom.wrap(err), sessions)
           }
           else {
             sessions.find(session).populate("user").exec((err, new_session) => {
               if (err) {
-                reply[request.headers.accept.toString()](Boom.wrap(err), sessions)
+                reply(Boom.wrap(err), sessions)
               }
               // If there's a configured redirect, do that.
               else if (redirect_to) {
@@ -283,7 +283,7 @@ class Multicolour_Auth_OAuth extends Map {
               }
               else {
                 // Reply.
-                reply[request.headers.accept.toString()](new_session, sessions)
+                reply(new_session, sessions)
               }
             })
           }
