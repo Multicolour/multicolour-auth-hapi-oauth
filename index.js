@@ -29,6 +29,8 @@ class Multicolour_Auth_OAuth extends Map {
     const host = generator.request("host")
     const server = generator.request("raw")
 
+    host._enable_user_model()
+
     // Get the config.
     const config = host.get("config").get("auth")
 
