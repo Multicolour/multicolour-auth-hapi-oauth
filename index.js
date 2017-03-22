@@ -119,8 +119,12 @@ class Multicolour_Auth_OAuth extends Map {
 
       // Get any other info about this provider,
       // ignore any errors here.
-      const provider = require(`./lib/providers/${auth_config.provider}`)
-      provider.get_extra_routes(host, server)
+      try {
+        const provider = require(`./lib/providers/${auth_config.provider}`)
+        provider.get_extra_routes(host, server)
+      } catch (error) {
+        this.debug(`No extra routes for provider ${auth_config.provider}`)
+      }
     })
 
     const strategies = this.get("auth_names")

@@ -42,6 +42,7 @@ If, for example you wanted to have a Login With Twitter, Facebook & Github your 
 ...
   auth: {
     password: "YOUR SECURE COOKIE PASSWORD HERE",
+    redirect: "http://localhost:1811/user-logged-in",
     providers: [
       {
         provider: "twitter",
@@ -67,7 +68,8 @@ If, for example you wanted to have a Login With Twitter, Facebook & Github your 
 
 This will create several new endpoints which are visible on your `multicolour` docs page under the `session` endpoint.
 
-TODO:
-document `SALT_GEN_PRIME_LENGTH`, `PW_GEN_PW_ITERS`, `PW_GEN_PW_LENGTH`, `PW_GEN_PW_ALG`
+## Redirects
+
+By default, when you auth with a provider you'll be redirected to the resulting session model, this is unlikely to be what you wanted so you configure this by setting the `redirect` property in the auth config.
 
 [bell]: https://github.com/hapijs/bell

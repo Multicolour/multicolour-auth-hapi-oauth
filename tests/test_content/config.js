@@ -22,7 +22,7 @@ module.exports = {
   // available to Hapi are available to Multicolour.
   api_connections: {
     port: 1811,
-    host: "localhost", // Uncomment if you dont want to bind on all network devices.
+    host: "localhost",
     routes: {
       cors: {
         // You should update this to reflect only
@@ -43,7 +43,6 @@ module.exports = {
     debug: { request: ["error"] }
   },
 
-  // Set up our desired database adapter (defaults to Mongo)
   db: {
     adapters: {
       memory: require("sails-memory")
