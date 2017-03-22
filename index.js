@@ -6,28 +6,34 @@ const Boom = require("boom")
 // Get the validation library.
 const joi = require("joi")
 
+const debug = require("debug")
+
 class Multicolour_Auth_OAuth extends Map {
 
-  constructor(generator) {
+  constructor() {
     // Construct.
     super()
 
+    this.debug = debug("multicolour:auth")
+
     // Set the defaults.
-    this
-      .set("auth_config", "session_store")
-      .set("generator", generator)
+    this.set("auth_config", "session_store")
   }
 
   /**
    * Register any plugins on the server, called by
    * the server plugin.
-   * @param  {Function} generator that instantiates this plugin.
+   * @param  {Multicolour_Hapi_Server} generator that instantiates this plugin.
    * @return {Multicolour_Auth_OAuth} Object for chaining.
    */
   register(generator) {
+    this.set("generator", generator)
+
     // Get the host and server.
     const host = generator.request("host")
     const server = generator.request("raw")
+
+    this.debug("Enabling user model in core.")
 
     host._enable_user_model()
 
@@ -58,8 +64,13 @@ class Multicolour_Auth_OAuth extends Map {
         throw error
       }
 
+      this.debug("Configuring auth providers")
+
       // Register the auth strategies.
       config.providers.forEach(auth_config => {
+
+        this.debug(`Registering auth strategy ${auth_config.provider}`)
+
         // Add the password to the config.
         auth_config.password = config.password
 
@@ -70,8 +81,14 @@ class Multicolour_Auth_OAuth extends Map {
       // We'll use cookies to store the session for now.
       server.auth.strategy("session_store", "session_store", { host })
       server.auth.default("session_store")
+
+      this.register_routes(config, host, server)
     })
 
+    return this
+  }
+
+  register_routes(config, host, server) {
     // Get the handlers.
     const handlers = this.handlers()
 
@@ -169,8 +186,6 @@ class Multicolour_Auth_OAuth extends Map {
         }
       }
     ])
-
-    return this
   }
 
   /**
@@ -181,7 +196,9 @@ class Multicolour_Auth_OAuth extends Map {
    */
   create(request, reply_interface) {
     // Get the reply interface.
-    const reply = this.get("generator").get_decorator_for_apply_value(reply_interface, request.headers.accept)
+    const reply = this.get("generator")
+      .request("handlers")
+      .get_decorator_for_apply_value(reply_interface, request.headers.accept)
 
     // Get the profile from the request.
     const profile = request.auth.credentials || {}

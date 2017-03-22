@@ -32,6 +32,7 @@
   "dependencies": {
     "bell": "^7.1.0",
     "boom": "^3.1.2",
+    "debug": "^2.6.3",
     "hapi": "^13.0.0",
     "joi": "^8.0.4",
     "multicolour": "^0.3.2",
