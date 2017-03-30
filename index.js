@@ -10,11 +10,15 @@ const debug = require("debug")
 
 class Multicolour_Auth_OAuth extends Map {
 
-  constructor() {
+  constructor(host) {
     // Construct.
     super()
 
     this.debug = debug("multicolour:auth")
+
+    // Enable the user model.
+    this.debug("Enabling user model in core.")
+    host.request("host")._enable_user_model()
 
     // Set the defaults.
     this.set("auth_config", "session_store")
@@ -32,10 +36,6 @@ class Multicolour_Auth_OAuth extends Map {
     // Get the host and server.
     const host = generator.request("host")
     const server = generator.request("raw")
-
-    this.debug("Enabling user model in core.")
-
-    host._enable_user_model()
 
     // Get the config.
     const config = host.get("config").get("auth")
