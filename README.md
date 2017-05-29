@@ -1,5 +1,7 @@
 # multicolour-auth-oauth
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/Multicolour/multicolour-auth-hapi-oauth.svg)](https://greenkeeper.io/)
+
 [![Build Status](https://travis-ci.org/Multicolour/multicolour-auth-hapi-oauth.svg?branch=master)](https://travis-ci.org/Multicolour/multicolour-auth-hapi-oauth)
 [![Coverage Status](https://coveralls.io/repos/github/Multicolour/multicolour-auth-hapi-oauth/badge.svg?branch=master)](https://coveralls.io/github/Multicolour/multicolour-auth-hapi-oauth?branch=master)
 [![Dependency Status](https://david-dm.org/Multicolour/multicolour-auth-hapi-oauth.svg)](https://david-dm.org/Multicolour/multicolour-auth-hapi-oauth)
