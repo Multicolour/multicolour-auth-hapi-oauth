@@ -1,6 +1,6 @@
 {
   "name": "multicolour-hapi-oauth",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "OAuth auth plugin for Multicolour HapiJS Servers",
   "main": "index.js",
   "scripts": {
