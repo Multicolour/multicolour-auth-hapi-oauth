@@ -138,16 +138,13 @@ class Multicolour_Auth_OAuth extends Map {
           auth: { strategies },
           handler: (request, reply) => {
             // Get the handlers.
-            const handlers = require("multicolour/lib/handlers")
+            const handlers = host.get("handlers")
 
             // Get the model.
             const model = host.get("database").get("models").session
 
-            // Set the host on the handlers.
-            handlers.set_host(host)
-
             // Run the query.
-            handlers.GET.bind(model)(request, (err, models) =>
+            handlers.GET(model, request, (err, models) =>
               reply[request.headers.accept.toString()](err || models, model))
           },
           description: "Get your session and profile.",

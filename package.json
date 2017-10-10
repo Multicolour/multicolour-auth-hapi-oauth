@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Multicolour/multicolour-auth-oauth.git"
+    "url": "git+https://github.com/Multicolour/multicolour-hapi-oauth.git"
   },
   "keywords": [
     "oauth",
@@ -18,12 +18,13 @@
   "author": "newworldcode <hello@newworld.codes> (https://newworld.codes)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Multicolour/multicolour-auth-oauth/issues"
+    "url": "https://github.com/Multicolour/multicolour-hapi-oauth/issues"
   },
-  "homepage": "https://github.com/Multicolour/multicolour-auth-oauth#readme",
+  "homepage": "https://github.com/Multicolour/multicolour-hapi-oauth#readme",
   "devDependencies": {
     "eslint": "^2.2.0",
     "istanbul": "^0.4.2",
+    "multicolour": "^0.3.5",
     "multicolour-server-hapi": "^1.3.0",
     "sails-memory": "^0.10.6",
     "tap-spec": "^4.1.1",
@@ -35,7 +36,6 @@
     "debug": "^2.6.3",
     "hapi": "^13.0.0",
     "joi": "^8.0.4",
-    "multicolour": "^0.3.2",
     "request": "^2.69.0",
     "waterline": "^0.12.1"
   }

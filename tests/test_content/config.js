@@ -5,7 +5,7 @@ module.exports = {
   content: __dirname,
 
   auth: {
-    password: "1234",
+    password: "12owgwnoirgjnowrgjnwpiorgjwpgrjp2wpo34",
     providers: [
       {
         provider: "twitter",

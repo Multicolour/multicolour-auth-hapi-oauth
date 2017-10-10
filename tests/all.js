@@ -13,7 +13,7 @@ multicolour.use(require("multicolour-server-hapi"))
 multicolour.get("server").use(require("../index"))
 
 // Start the tests once the database has "started"
-multicolour.get("database").start(() => {
+multicolour.get("database").start().then(() => {
   // Get the raw server.
   const server = multicolour.get("server").request("raw")
   const models = multicolour.get("database").get("models")
