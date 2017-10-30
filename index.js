@@ -48,7 +48,7 @@ class Multicolour_Auth_OAuth extends Map {
 
       // Add another header to validate.
       .request("header_validator")
-        .set("authorization", joi.string().required())
+      .set("authorization", joi.string().required())
 
     // Register the session model with the hosting Multicolour's Waterline instance.
     host.get("database").get("definitions").session = require("./lib/session_model")
@@ -114,6 +114,42 @@ class Multicolour_Auth_OAuth extends Map {
           description: `Create a new session/user using "${auth_config.provider}"`,
           notes: `Create a new session/user using "${auth_config.provider}"`,
           tags: ["api", "auth", auth_config.provider]
+        }
+      })
+
+      server.route({
+        method: "POST",
+        path: "/session",
+        config: {
+          auth: false,
+          handler: (request, reply) => {
+            const method = request.headers.accept
+            const models = this.multicolour.get("database").get("models")
+
+            const args = {
+              email: request.payload.email.toString(),
+              password: request.payload.password,
+              callback: (err, session) => {
+              // Check for errors.
+                if (err)
+                  reply(boom.wrap(err))
+                else
+                  get_decorator_for_apply_value(reply, method)(session, models.session).code(202)
+              }
+            }
+
+            generator.trigger("auth_login", args)
+          },
+          validate: {
+            headers,
+            payload: {
+              email: joi.string().required(),
+              password: joi.string().required()
+            }
+          },
+          description: "Create a new session",
+          notes: "Create a new session",
+          tags: ["api", "auth", "jwt"]
         }
       })
 
