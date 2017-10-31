@@ -351,7 +351,7 @@ class Multicolour_Auth_OAuth extends Map {
         utils.hash_password(request.payload.password, found_user.salt, password => {
           // Do another search for the user
           // with the hashed password & salt.
-          models.user.findOne({
+          models.multicolour_user.findOne({
             username: request.payload.username,
             requires_password: false,
             password
