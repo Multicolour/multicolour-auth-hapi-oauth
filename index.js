@@ -117,42 +117,6 @@ class Multicolour_Auth_OAuth extends Map {
         }
       })
 
-      server.route({
-        method: "POST",
-        path: "/session",
-        config: {
-          auth: false,
-          handler: (request, reply) => {
-            const method = request.headers.accept
-            const models = this.multicolour.get("database").get("models")
-
-            const args = {
-              email: request.payload.email.toString(),
-              password: request.payload.password,
-              callback: (err, session) => {
-              // Check for errors.
-                if (err)
-                  reply(boom.wrap(err))
-                else
-                  get_decorator_for_apply_value(reply, method)(session, models.session).code(202)
-              }
-            }
-
-            generator.trigger("auth_login", args)
-          },
-          validate: {
-            headers,
-            payload: {
-              email: joi.string().required(),
-              password: joi.string().required()
-            }
-          },
-          description: "Create a new session",
-          notes: "Create a new session",
-          tags: ["api", "auth", "jwt"]
-        }
-      })
-
       // Get any other info about this provider,
       // ignore any errors here.
       try {
@@ -215,7 +179,7 @@ class Multicolour_Auth_OAuth extends Map {
           tags: ["api", "auth"],
           validate: {
             payload: joi.object({
-              username: joi.string().required(),
+              email: joi.string().email().required(),
               password: joi.string().required()
             }),
             headers
@@ -365,8 +329,8 @@ class Multicolour_Auth_OAuth extends Map {
     const decorator = request.headers.accept.toString()
 
     // Get the user and session models.
-    models.user.findOne({
-      username: request.payload.username,
+    models.multicolour_user.findOne({
+      email: request.payload.email,
       requires_password: false
     }, (err, found_user) => {
       // Check for errors.
@@ -377,7 +341,7 @@ class Multicolour_Auth_OAuth extends Map {
       // that doesn't require a password.
       else if (!found_user) {
         reply[decorator](
-          Boom.unauthorized("Incorrect username or password."),
+          Boom.unauthorized("Incorrect email or password."),
           models.session
         )
       }
