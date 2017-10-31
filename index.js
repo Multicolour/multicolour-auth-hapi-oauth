@@ -335,7 +335,7 @@ class Multicolour_Auth_OAuth extends Map {
     }, (err, found_user) => {
       // Check for errors.
       if (err) {
-        reply[decorator](Boom.wrap(err), models.session)
+        reply[decorator](Boom.wrap(err), models.session).code(500)
       }
       // Check we found a user by that username
       // that doesn't require a password.
@@ -343,7 +343,7 @@ class Multicolour_Auth_OAuth extends Map {
         reply[decorator](
           Boom.unauthorized("Incorrect email or password."),
           models.session
-        )
+        ).code(401)
       }
       // Otherwise, hash the password and search again.
       else {
@@ -358,14 +358,14 @@ class Multicolour_Auth_OAuth extends Map {
           }, err => {
             // Check for errors.
             if (err) {
-              reply[decorator](Boom.wrap(err), models.session)
+              reply[decorator](Boom.wrap(err), models.session).code(500)
             }
             // Check we found a user
             else if (!found_user) {
               reply[decorator](
                 Boom.unauthorized("Incorrect username or password."),
                 models.session
-              )
+              ).code(401)
             }
             // Create the session.
             else {
@@ -375,7 +375,7 @@ class Multicolour_Auth_OAuth extends Map {
               }, (err, created_session) => {
                 // Check for errors.
                 if (err) {
-                  reply[decorator](Boom.wrap(err), models.session)
+                  reply[decorator](Boom.wrap(err), models.session).code(500)
                 }
                 else {
                   // Get the session and user details to form the reply.
@@ -384,11 +384,10 @@ class Multicolour_Auth_OAuth extends Map {
                     .populateAll()
                     .exec((err, response) => {
                       if (err) {
-                        reply[decorator](Boom.wrap(err), models.session)
+                        reply[decorator](Boom.wrap(err), models.session).code(500)
                       }
                       else {
-                        response.user = response.user.toJSON()
-                        reply[decorator](response.toJSON(), models.session)
+                        reply[decorator](response.toJSON(), models.session).code(202)
                       }
                     })
                 }
