@@ -352,7 +352,7 @@ class Multicolour_Auth_OAuth extends Map {
           // Do another search for the user
           // with the hashed password & salt.
           models.multicolour_user.findOne({
-            username: request.payload.username,
+            email: request.payload.email,
             requires_password: false,
             password
           }, err => {
@@ -381,7 +381,7 @@ class Multicolour_Auth_OAuth extends Map {
                   // Get the session and user details to form the reply.
                   models.session
                     .findOne(created_session)
-                    .populate("user")
+                    .populateAll()
                     .exec((err, response) => {
                       if (err) {
                         reply[decorator](Boom.wrap(err), models.session)
