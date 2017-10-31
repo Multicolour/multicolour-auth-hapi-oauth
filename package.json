@@ -1,6 +1,6 @@
 {
   "name": "multicolour-hapi-oauth",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "OAuth auth plugin for Multicolour HapiJS Servers",
   "main": "index.js",
   "scripts": {
@@ -35,7 +35,7 @@
     "boom": "^3.1.2",
     "debug": "^2.6.3",
     "hapi": "^13.0.0",
-    "joi": "^8.0.4",
+    "joi": "^10.6.0",
     "request": "^2.69.0",
     "waterline": "^0.12.1"
   }
