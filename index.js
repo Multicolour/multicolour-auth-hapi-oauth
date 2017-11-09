@@ -158,8 +158,7 @@ class Multicolour_Auth_OAuth extends Map {
         path: "/session",
         config: {
           auth: {
-            strategies,
-            scope: [ "user" ]
+            strategies
           },
           handler: handlers.get("destroy"),
           description: "Delete a session.",
