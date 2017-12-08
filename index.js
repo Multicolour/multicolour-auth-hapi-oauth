@@ -348,49 +348,33 @@ class Multicolour_Auth_OAuth extends Map {
       else {
         // Hash the password.
         utils.hash_password(request.payload.password, found_user.salt, password => {
-          // Do another search for the user
-          // with the hashed password & salt.
-          models.multicolour_user.findOne({
-            email: request.payload.email,
-            requires_password: false,
-            password
-          }, err => {
+          if (password !== found_user.password)
+            return reply[decorator](
+              Boom.unauthorized("Incorrect email or password."),
+              models.session
+            ).code(401)
+
+          models.session.create({
+            token: utils.create_salt(),
+            user: found_user.id
+          }, (err, created_session) => {
             // Check for errors.
             if (err) {
               reply[decorator](Boom.wrap(err), models.session).code(500)
             }
-            // Check we found a user
-            else if (!found_user) {
-              reply[decorator](
-                Boom.unauthorized("Incorrect username or password."),
-                models.session
-              ).code(401)
-            }
-            // Create the session.
             else {
-              models.session.create({
-                token: utils.create_salt(),
-                user: found_user.id
-              }, (err, created_session) => {
-                // Check for errors.
-                if (err) {
-                  reply[decorator](Boom.wrap(err), models.session).code(500)
-                }
-                else {
-                  // Get the session and user details to form the reply.
-                  models.session
-                    .findOne(created_session)
-                    .populateAll()
-                    .exec((err, response) => {
-                      if (err) {
-                        reply[decorator](Boom.wrap(err), models.session).code(500)
-                      }
-                      else {
-                        reply[decorator](response.toJSON(), models.session).code(202)
-                      }
-                    })
-                }
-              })
+              // Get the session and user details to form the reply.
+              models.session
+                .findOne(created_session)
+                .populateAll()
+                .exec((err, response) => {
+                  if (err) {
+                    reply[decorator](Boom.wrap(err), models.session).code(500)
+                  }
+                  else {
+                    reply[decorator](response.toJSON(), models.session).code(202)
+                  }
+                })
             }
           })
         })
