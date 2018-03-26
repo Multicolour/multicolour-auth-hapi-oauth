@@ -1,6 +1,6 @@
 {
   "name": "multicolour-hapi-oauth",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "OAuth auth plugin for Multicolour HapiJS Servers",
   "main": "index.js",
   "scripts": {
@@ -22,21 +22,21 @@
   },
   "homepage": "https://github.com/Multicolour/multicolour-hapi-oauth#readme",
   "devDependencies": {
-    "eslint": "^2.2.0",
-    "istanbul": "^0.4.2",
-    "multicolour": "^0.3.5",
-    "multicolour-server-hapi": "^1.3.0",
-    "sails-memory": "^0.10.6",
+    "eslint": "^4.19.1",
+    "istanbul": "^0.4.5",
+    "multicolour": "^0.6.18",
+    "multicolour-server-hapi": "^1.7.14",
+    "sails-memory": "^0.10.7",
     "tap-spec": "^4.1.1",
-    "tape": "^4.5.0"
+    "tape": "^4.9.0"
   },
   "dependencies": {
-    "bell": "^7.1.0",
-    "boom": "^3.1.2",
-    "debug": "^2.6.3",
-    "hapi": "^13.0.0",
-    "joi": "^10.6.0",
-    "request": "^2.69.0",
-    "waterline": "^0.12.1"
+    "bell": "^9.1.0",
+    "boom": "^7.2.0",
+    "debug": "^3.1.0",
+    "hapi": "^17.2.3",
+    "joi": "^13.1.2",
+    "request": "^2.85.0",
+    "waterline": "^0.13.1"
   }
 }
