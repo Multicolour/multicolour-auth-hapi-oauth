@@ -354,7 +354,7 @@ class Multicolour_Auth_OAuth extends Map {
               models.session
             ).code(401)
 
-          models.session.create({
+          models.session.findOrCreate({user: found_user.id}, {
             token: utils.create_salt(),
             user: found_user.id
           }, (err, created_session) => {
@@ -367,13 +367,23 @@ class Multicolour_Auth_OAuth extends Map {
               models.session
                 .findOne(created_session)
                 .populateAll()
-                .exec((err, response) => {
-                  if (err) {
-                    reply[decorator](Boom.wrap(err), models.session).code(500)
-                  }
-                  else {
-                    reply[decorator](response.toJSON(), models.session).code(202)
-                  }
+                .then(session => 
+                  models.multicolour_user
+                    .findOne(session.user)
+                    .populateAll()
+                    .then(multicolour_user => ({session, multicolour_user}))
+                )
+                .then(({session, multicolour_user}) => {
+                  const replySession = Object.assign(
+                    {},
+                    session.toJSON(),
+                    { user: multicolour_user.toJSON() }
+                  )
+                  console.log("REPLAR", replySession)
+                  reply[decorator](replySession, models.session).code(202)
+                })
+                .catch((err) => {
+                  reply[decorator](Boom.wrap(err), models.session).code(500)
                 })
             }
           })
