@@ -369,7 +369,7 @@ class Multicolour_Auth_OAuth extends Map {
                 .populateAll()
                 .then(session => 
                   models.multicolour_user
-                    .findOne(session.user)
+                    .findOne({id: found_user.id})
                     .populateAll()
                     .then(multicolour_user => ({session, multicolour_user}))
                 )
@@ -379,7 +379,7 @@ class Multicolour_Auth_OAuth extends Map {
                     session.toJSON(),
                     { user: multicolour_user.toJSON() }
                   )
-                  console.log("REPLAR", replySession)
+
                   reply[decorator](replySession, models.session).code(202)
                 })
                 .catch((err) => {
