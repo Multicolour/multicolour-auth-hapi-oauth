@@ -1,10 +1,10 @@
 "use strict"
 
 // Get the boom library for errors.
-const Boom = require("boom")
+const Boom = require("@hapi/boom")
 
 // Get the validation library.
-const joi = require("joi")
+const joi = require("@hapi/joi")
 
 const debug = require("debug")
 
@@ -30,7 +30,7 @@ class Multicolour_Auth_OAuth extends Map {
    * @param  {Multicolour_Hapi_Server} generator that instantiates this plugin.
    * @return {Multicolour_Auth_OAuth} Object for chaining.
    */
-  register(generator) {
+  async register(generator) {
     this.set("generator", generator)
 
     // Get the host and server.
@@ -54,36 +54,37 @@ class Multicolour_Auth_OAuth extends Map {
     host.get("database").get("definitions").session = require("./lib/session_model")
 
     // Register the plugins to the server.
-    server.register([
-      require("bell"),
-      require("./lib/hapi-db-plugin")
-    ], error => {
-      // Check for errors.
-      if (error) {
-        /* istanbul ignore next : Untestable */
-        throw error
-      }
-
-      this.debug("Configuring auth providers")
-
-      // Register the auth strategies.
-      config.providers.forEach(auth_config => {
-
-        this.debug(`Registering auth strategy ${auth_config.provider}`)
-
-        // Add the password to the config.
-        auth_config.password = config.password
-
-        // Configure the strategy.
-        server.auth.strategy(auth_config.provider, "bell", auth_config)
+    await server.register(require("@hapi/bell"))
+    return server.register(require("./lib/hapi-db-plugin"))
+      .catch(error => {
+        // Check for errors.
+        if (error) {
+          /* istanbul ignore next : Untestable */
+          throw error
+        }
       })
+      .then(() => {
 
-      // We'll use cookies to store the session for now.
-      server.auth.strategy("session_store", "session_store", { host })
-      server.auth.default("session_store")
+        this.debug("Configuring auth providers")
 
-      this.register_routes(config, host, server)
-    })
+        // Register the auth strategies.
+        config.providers.forEach(auth_config => {
+
+          this.debug(`Registering auth strategy ${auth_config.provider}`)
+
+          // Add the password to the config.
+          auth_config.password = config.password
+
+          // Configure the strategy.
+          server.auth.strategy(auth_config.provider, "bell", auth_config)
+        })
+
+        // We'll use cookies to store the session for now.
+        server.auth.strategy("session_store", "session_store", { host })
+        server.auth.default("session_store")
+
+        this.register_routes(config, host, server)
+      })
 
     return this
   }

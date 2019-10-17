@@ -22,19 +22,18 @@
   },
   "homepage": "https://github.com/Multicolour/multicolour-hapi-oauth#readme",
   "devDependencies": {
-    "eslint": "^4.19.1",
-    "istanbul": "^0.4.5",
-    "multicolour": "^0.6.18",
-    "multicolour-server-hapi": "^1.7.14",
+    "eslint": "^6.5.1",
+    "multicolour": "^0.6.39",
+    "multicolour-server-hapi": "^1.8.2",
     "sails-memory": "^0.10.7",
-    "tap-spec": "^4.1.1",
-    "tape": "^4.9.0"
+    "tap-spec": "^5.0.0",
+    "tape": "^4.11.0"
   },
   "dependencies": {
-    "bell": "^7.1.0",
-    "boom": "^3.1.2",
-    "debug": "^3.1.0",
-    "joi": "^10.6.0",
-    "request": "^2.85.0"
+    "@hapi/bell": "^11.1.0",
+    "@hapi/boom": "^8.0.1",
+    "@hapi/joi": "^16.1.7",
+    "debug": "^4.1.1",
+    "request": "^2.88.0"
   }
 }
